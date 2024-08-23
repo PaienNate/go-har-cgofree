@@ -1,4 +1,4 @@
-module github.com/Paiennate/go-har
+module github.com/Paiennate/go-har-cgofree
 
 go 1.21
 

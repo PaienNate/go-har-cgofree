@@ -43,7 +43,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/Paiennate/go-har/messageview"
+	"github.com/Paiennate/go-har-cgofree/messageview"
 
 	"golang.org/x/net/http/httpguts"
 	"golang.org/x/sync/semaphore"
