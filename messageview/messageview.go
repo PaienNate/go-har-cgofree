@@ -21,12 +21,11 @@ import (
 	"compress/flate"
 	"compress/gzip"
 	"fmt"
+	"github.com/andybalholm/brotli"
 	"io"
 	"net/http"
 	"net/http/httputil"
 	"strings"
-
-	"github.com/google/brotli/go/cbrotli"
 )
 
 // MessageView is a static view of an HTTP request or response.
@@ -230,6 +229,16 @@ func (mv *MessageView) HeaderReader() io.Reader {
 	return io.NewSectionReader(r, 0, mv.bodyoffset)
 }
 
+type BrotliReadCloser struct {
+	*brotli.Reader
+}
+
+func (brc *BrotliReadCloser) Close() error {
+	// Since brotli.Reader does not have any underlying resources that need to be closed,
+	// this method can simply return nil.
+	return nil
+}
+
 // BodyReader returns an io.ReadCloser that reads the HTTP request or response
 // body. If mv.skipBody was set the reader will immediately return io.EOF.
 //
@@ -264,7 +273,10 @@ func (mv *MessageView) BodyReader(opts ...Option) (io.ReadCloser, error) {
 	case "deflate":
 		return flate.NewReader(r), nil
 	case "br":
-		return cbrotli.NewReader(r), nil
+		brc := &BrotliReadCloser{
+			Reader: brotli.NewReader(r),
+		}
+		return brc, nil
 	default:
 		return io.NopCloser(r), nil
 	}
